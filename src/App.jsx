@@ -11,6 +11,7 @@ import AddServiceForm from './components/forms/AddServiceForm';
 import AddExpenseForm from './components/forms/AddExpenseForm';
 import AddPayrollForm from './components/forms/AddPayrollForm';
 import AddContactForm from './components/forms/AddContactForm';
+import Notifications from './components/Notifications';
 
 const App = () => {
   const [activeTab, setActiveTab] = useState('services');
@@ -188,6 +189,35 @@ const App = () => {
     }
   };
 
+  const getAlerts = () => {
+    const alerts = [];
+    const today = new Date().toISOString().split('T')[0];
+
+    // 1. Pending Payments
+    const pendingPayments = services.filter(s => s.status === 'بانتظار الدفع');
+    if (pendingPayments.length > 0) {
+      alerts.push({
+        title: 'دفعات معلقة',
+        message: `يوجد ${pendingPayments.length} عمليات بانتظار الدفع بقيمة إجمالية ${pendingPayments.reduce((a, b) => a + (Number(b.revenue) || 0), 0).toFixed(2)}€`,
+        type: 'warning',
+        time: 'الآن'
+      });
+    }
+
+    // 2. Jobs Today
+    const todaysJobs = services.filter(s => s.date === today && s.status === 'مجدول');
+    if (todaysJobs.length > 0) {
+      alerts.push({
+        title: 'عمليات اليوم',
+        message: `لديك ${todaysJobs.length} عمليات مجدولة لليوم: ${todaysJobs.map(j => j.client).slice(0, 2).join('، ')}${todaysJobs.length > 2 ? '...' : ''}`,
+        type: 'info',
+        time: 'اليوم'
+      });
+    }
+
+    return alerts;
+  };
+
   const getButtonLabel = () => {
     switch (activeTab) {
       case 'services': return 'عملية جديدة';
@@ -211,8 +241,10 @@ const App = () => {
               ميلانو، إيطاليا - {new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>
-          <div className="flex gap-3 mt-4 md:mt-0 w-full md:w-auto">
-            <button className="flex-1 md:flex-none justify-center items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-50 shadow-sm transition font-medium text-sm">
+          <div className="flex gap-3 mt-4 md:mt-0 w-full md:w-auto items-center">
+            <Notifications alerts={getAlerts()} />
+
+            <button className="flex-1 md:flex-none justify-center items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-50 shadow-sm transition font-medium text-sm hidden md:flex">
               <FileText size={16} />
               تصدير Excel
             </button>

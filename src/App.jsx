@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, DollarSign, FileText, Briefcase, Plus } from 'lucide-react';
+import { Users, DollarSign, FileText, Briefcase, Plus, LogOut } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import ServicesTable from './components/ServicesTable';
 import ExpensesList from './components/ExpensesList';
@@ -13,7 +13,7 @@ import AddPayrollForm from './components/forms/AddPayrollForm';
 import AddContactForm from './components/forms/AddContactForm';
 import Notifications from './components/Notifications';
 import Login from './components/Login';
-import { Users, DollarSign, FileText, Briefcase, Plus, LogOut } from 'lucide-react';
+
 
 const App = () => {
   const [session, setSession] = useState(null);

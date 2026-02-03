@@ -18,14 +18,15 @@ const PayrollTable = ({ payroll, onEdit, onDelete }) => {
                     <Printer size={14} /> طباعة الكشف
                 </button>
             </div>
-            <div className="overflow-x-auto">
+            {/* Desktop View */}
+            <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm text-right text-gray-700">
                     <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b">
                         <tr>
-                            <th className="px-4 py-3">اسم العامل</th>
-                            <th className="px-4 py-3">ساعات العمل</th>
-                            <th className="px-4 py-3">سعر الساعة</th>
-                            <th className="px-4 py-3">بدلات</th>
+                            <th className="px-4 py-3">الموظف</th>
+                            <th className="px-4 py-3">ساعات</th>
+                            <th className="px-4 py-3">المعدل</th>
+                            <th className="px-4 py-3">مكافآت</th>
                             <th className="px-4 py-3">سلفيات</th>
                             <th className="px-4 py-3 bg-blue-50 text-blue-800">الصافي المستحق</th>
                             <th className="px-4 py-3">حالة التحويل</th>
@@ -70,6 +71,45 @@ const PayrollTable = ({ payroll, onEdit, onDelete }) => {
                         ))}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Mobile View (Cards) */}
+            <div className="md:hidden flex flex-col gap-3 p-3 bg-gray-50">
+                {payroll.map((item) => (
+                    <div key={item.id} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                        <div className="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 className="font-bold text-gray-800">{item.name}</h4>
+                                <span className="text-xs text-gray-500">{item.totalHours} ساعة @ {item.rate}€</span>
+                            </div>
+                            <div className="flex gap-2">
+                                <button onClick={() => onEdit(item)} className="text-blue-500 p-1 bg-blue-50 rounded"><Edit size={14} /></button>
+                                <button onClick={() => onDelete(item.id)} className="text-red-500 p-1 bg-red-50 rounded"><Trash2 size={14} /></button>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-between items-center bg-gray-50 p-2 rounded mb-2">
+                            <div className="text-xs space-y-1">
+                                <div className="text-green-600">+{item.bonus} مكافأة</div>
+                                <div className="text-red-600">-{item.advance} سلفة</div>
+                            </div>
+                            <div className="text-right">
+                                <span className="block text-xs text-gray-500">الصافي</span>
+                                <span className="font-bold text-blue-700 text-lg">
+                                    {calculateNetPay(item.totalHours, item.rate, item.bonus, item.advance)} €
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="text-center">
+                            {item.status === 'تم التحويل' ? (
+                                <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs border border-green-200 inline-block">{item.status}</span>
+                            ) : (
+                                <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded text-xs border border-yellow-200 inline-block">{item.status}</span>
+                            )}
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );

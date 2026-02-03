@@ -1,7 +1,30 @@
 import React from 'react';
-import { Briefcase, Filter, CheckCircle, Clock, Calendar, Pencil, Trash2 } from 'lucide-react';
+import { Briefcase, Filter, CheckCircle, Clock, Calendar, Pencil, Trash2, FileDown } from 'lucide-react';
+import { generateInvoiceXML } from '../utils/xmlGenerator';
 
-const ServicesTable = ({ services, onEdit, onDelete }) => {
+const ServicesTable = ({ services, contacts, onEdit, onDelete }) => {
+
+    const handleDownloadXML = (service) => {
+        // Find full client details from contacts list
+        const clientData = contacts?.find(c => c.name === service.client);
+
+        try {
+            const xmlContent = generateInvoiceXML(service, clientData);
+
+            // Create a blob and trigger download
+            const blob = new Blob([xmlContent], { type: 'application/xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Fattura_${service.client}_${service.date}.xml`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            alert('Error generating XML: ' + error.message);
+        }
+    };
     return (
         <div className="bg-white rounded-lg shadow border border-gray-100 overflow-hidden">
             <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
@@ -15,7 +38,8 @@ const ServicesTable = ({ services, onEdit, onDelete }) => {
                     </button>
                 </div>
             </div>
-            <div className="overflow-x-auto">
+            {/* Desktop View */}
+            <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm text-right text-gray-700">
                     <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b">
                         <tr>
@@ -66,6 +90,13 @@ const ServicesTable = ({ services, onEdit, onDelete }) => {
                                 <td className="px-4 py-3 text-gray-400 text-xs">{item.invoice}</td>
                                 <td className="px-4 py-3 flex items-center gap-2">
                                     <button
+                                        onClick={() => handleDownloadXML(item)}
+                                        className="text-green-600 hover:bg-green-50 p-1.5 rounded transition"
+                                        title="تنزيل فاتورة XML"
+                                    >
+                                        <FileDown size={15} />
+                                    </button>
+                                    <button
                                         onClick={() => onEdit(item)}
                                         className="text-blue-500 hover:bg-blue-50 p-1.5 rounded transition"
                                         title="تعديل"
@@ -84,6 +115,43 @@ const ServicesTable = ({ services, onEdit, onDelete }) => {
                         ))}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Mobile View (Cards) */}
+            <div className="md:hidden flex flex-col gap-3 p-3 bg-gray-50">
+                {services.map((item) => (
+                    <div key={item.id} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                        <div className="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 className="font-bold text-gray-800">{item.client}</h4>
+                                <span className="text-xs text-gray-500">{item.date}</span>
+                            </div>
+                            <div className="flex gap-2">
+                                <button onClick={() => handleDownloadXML(item)} className="text-green-600 p-1 bg-green-50 rounded"><FileDown size={14} /></button>
+                                <button onClick={() => onEdit(item)} className="text-blue-500 p-1 bg-blue-50 rounded"><Pencil size={14} /></button>
+                                <button onClick={() => onDelete(item.id)} className="text-red-500 p-1 bg-red-50 rounded"><Trash2 size={14} /></button>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 mb-3">
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded border ${item.type === 'تنظيف عميق' ? 'bg-purple-50 text-purple-700 border-purple-100' : 'bg-blue-50 text-blue-700 border-blue-100'}`}>
+                                {item.type}
+                            </span>
+                            {item.status === 'تم الدفع' ? (
+                                <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded text-xs border border-green-100 flex items-center gap-1"><CheckCircle size={10} /> {item.status}</span>
+                            ) : (
+                                <span className="text-orange-600 bg-orange-50 px-2 py-0.5 rounded text-xs border border-orange-100 flex items-center gap-1"><Clock size={10} /> {item.status}</span>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 border-t pt-2 mt-2">
+                            <div><span className="text-gray-400 text-xs">الموقع:</span> {item.location}</div>
+                            <div><span className="text-gray-400 text-xs">الموظف:</span> {item.staff}</div>
+                            <div><span className="text-gray-400 text-xs">الساعات:</span> {item.hours}</div>
+                            <div className="font-bold text-gray-800"><span className="text-gray-400 font-normal text-xs">القيمة:</span> {item.revenue} €</div>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );

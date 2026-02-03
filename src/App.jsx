@@ -287,11 +287,25 @@ const App = () => {
     totalHours: p.total_hours !== undefined ? p.total_hours : p.totalHours,
   }));
 
-  const mapContacts = contacts.map(c => ({
-    ...c,
-    taxId: c.tax_id !== undefined ? c.tax_id : c.taxId,
-    startBalance: c.start_balance !== undefined ? c.start_balance : c.startBalance
-  }));
+  const mapContacts = contacts.map(c => {
+    const clientServices = services.filter(s => s.client === c.name);
+
+    // Calculate Volume (Total Business)
+    const volume = clientServices.reduce((acc, curr) => acc + (Number(curr.revenue) || 0), 0);
+
+    // Calculate Outstanding (Pending Payments) + Start Balance
+    const pendingServices = clientServices.filter(s => s.status !== 'تم الدفع');
+    const servicesOutstanding = pendingServices.reduce((acc, curr) => acc + (Number(curr.revenue) || 0), 0);
+    const totalOutstanding = servicesOutstanding + (Number(c.start_balance) || 0);
+
+    return {
+      ...c,
+      taxId: c.tax_id !== undefined ? c.tax_id : c.taxId,
+      startBalance: c.start_balance !== undefined ? c.start_balance : c.startBalance,
+      volume: volume,
+      outstanding: totalOutstanding
+    };
+  });
 
   const renderContent = () => {
     if (loading && services.length === 0 && expenses.length === 0) {
@@ -302,6 +316,7 @@ const App = () => {
       case 'services':
         return <ServicesTable
           services={services}
+          contacts={mapContacts}
           onEdit={(item) => handleOpenModal('service', item)}
           onDelete={handleDeleteService}
         />;

@@ -200,7 +200,11 @@ const App = () => {
         </header>
 
         {/* Dashboard Cards Summary */}
-        <DashboardStats />
+        <DashboardStats
+          revenue={services.reduce((acc, curr) => acc + (Number(curr.revenue) || 0), 0)}
+          expenses={expenses.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0)}
+          outstanding={services.filter(s => s.status !== 'تم الدفع').reduce((acc, curr) => acc + (Number(curr.revenue) || 0), 0)}
+        />
 
         {/* Navigation Tabs */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-1.5 flex overflow-x-auto gap-1">

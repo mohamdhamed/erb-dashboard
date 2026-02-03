@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Save } from 'lucide-react';
 
-const AddPayrollForm = ({ onSave, onCancel }) => {
-    const [formData, setFormData] = useState({
+const AddPayrollForm = ({ onSave, onCancel, initialData }) => {
+    const [formData, setFormData] = useState(initialData || {
         name: '',
         totalHours: 0,
         rate: 10,

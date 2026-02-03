@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Save } from 'lucide-react';
 
-const AddExpenseForm = ({ onSave, onCancel }) => {
-    const [formData, setFormData] = useState({
+const AddExpenseForm = ({ onSave, onCancel, initialData }) => {
+    const [formData, setFormData] = useState(initialData || {
         date: new Date().toISOString().split('T')[0],
         category: 'منظفات',
         vendor: '',

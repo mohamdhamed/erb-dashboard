@@ -1,7 +1,7 @@
 import React from 'react';
-import { DollarSign, FileText } from 'lucide-react';
+import { DollarSign, FileText, Edit, Trash2 } from 'lucide-react';
 
-const ExpensesList = ({ expenses }) => {
+const ExpensesList = ({ expenses, onEdit, onDelete }) => {
     return (
         <div className="bg-white rounded-lg shadow border border-gray-100 overflow-hidden">
             <div className="p-4 border-b bg-gray-50">
@@ -32,9 +32,20 @@ const ExpensesList = ({ expenses }) => {
                                 <td className="px-4 py-3 text-gray-700">{item.vendor}</td>
                                 <td className="px-4 py-3 font-bold text-red-600">-{item.amount} €</td>
                                 <td className="px-4 py-3 text-gray-500">{item.method}</td>
-                                <td className="px-4 py-3">
-                                    <button className="text-blue-600 hover:text-blue-800 text-xs flex items-center gap-1 hover:underline">
-                                        <FileText size={12} /> عرض
+                                <td className="px-4 py-3 flex gap-2 justify-end">
+                                    <button
+                                        onClick={() => onEdit(item)}
+                                        className="text-blue-600 hover:text-blue-800 p-1 hover:bg-blue-50 rounded transition"
+                                        title="تعديل"
+                                    >
+                                        <Edit size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => onDelete(item.id)}
+                                        className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition"
+                                        title="حذف"
+                                    >
+                                        <Trash2 size={16} />
                                     </button>
                                 </td>
                             </tr>

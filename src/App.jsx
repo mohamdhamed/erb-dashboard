@@ -111,41 +111,87 @@ const App = () => {
     }
   };
 
-  const handleAddExpense = async (newExpense) => {
+  const handleSaveExpense = async (formData) => {
     try {
-      const { data, error } = await supabase.from('expenses').insert([newExpense]).select();
-      if (error) throw error;
-      setExpenses([data[0], ...expenses]);
+      if (editingService) { // We reuse editingService state for all edit modals
+        const { error } = await supabase
+          .from('expenses')
+          .update(formData)
+          .eq('id', editingService.id);
+
+        if (error) throw error;
+
+        setExpenses(expenses.map(e => e.id === editingService.id ? { ...formData, id: editingService.id } : e));
+      } else {
+        const { data, error } = await supabase.from('expenses').insert([formData]).select();
+        if (error) throw error;
+        setExpenses([data[0], ...expenses]);
+      }
       setIsModalOpen(false);
+      setEditingService(null);
     } catch (error) {
-      alert('Error adding expense: ' + error.message);
+      alert('Error saving expense: ' + error.message);
     }
   };
 
-  const handleAddPayroll = async (newPayroll) => {
+  const handleDeleteExpense = async (id) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذا المصروف؟')) return;
+    try {
+      const { error } = await supabase.from('expenses').delete().eq('id', id);
+      if (error) throw error;
+      setExpenses(expenses.filter(e => e.id !== id));
+    } catch (error) {
+      alert('Error deleting expense: ' + error.message);
+    }
+  };
+
+
+  const handleSavePayroll = async (formData) => {
     try {
       const dbPayload = {
-        name: newPayroll.name,
-        total_hours: newPayroll.totalHours,
-        rate: newPayroll.rate,
-        bonus: newPayroll.bonus,
-        advance: newPayroll.advance,
-        status: newPayroll.status
+        name: formData.name,
+        total_hours: formData.totalHours,
+        rate: formData.rate,
+        bonus: formData.bonus,
+        advance: formData.advance,
+        status: formData.status
       };
-      const { data, error } = await supabase.from('payroll').insert([dbPayload]).select();
-      if (error) throw error;
 
-      // Optimistic update or refetch. Here we use the returned data but need to map it back for UI if component expects camelCase
-      const newItem = {
-        ...data[0],
-        totalHours: data[0].total_hours
+      if (editingService) {
+        const { error } = await supabase
+          .from('payroll')
+          .update(dbPayload)
+          .eq('id', editingService.id);
+
+        if (error) throw error;
+
+        const updatedItem = { ...dbPayload, id: editingService.id, totalHours: dbPayload.total_hours };
+        setPayroll(payroll.map(p => p.id === editingService.id ? updatedItem : p));
+      } else {
+        const { data, error } = await supabase.from('payroll').insert([dbPayload]).select();
+        if (error) throw error;
+
+        const newItem = { ...data[0], totalHours: data[0].total_hours };
+        setPayroll([newItem, ...payroll]);
       }
-      setPayroll([newItem, ...payroll]);
       setIsModalOpen(false);
+      setEditingService(null);
     } catch (error) {
-      alert('Error adding payroll: ' + error.message);
+      alert('Error saving payroll: ' + error.message);
     }
   };
+
+  const handleDeletePayroll = async (id) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذا السجل؟')) return;
+    try {
+      const { error } = await supabase.from('payroll').delete().eq('id', id);
+      if (error) throw error;
+      setPayroll(payroll.filter(p => p.id !== id));
+    } catch (error) {
+      alert('Error deleting payroll: ' + error.message);
+    }
+  };
+
 
   const handleAddContact = async (newContact) => {
     try {
@@ -260,9 +306,17 @@ const App = () => {
           onDelete={handleDeleteService}
         />;
       case 'expenses':
-        return <ExpensesList expenses={expenses} />;
+        return <ExpensesList
+          expenses={expenses}
+          onEdit={(item) => handleOpenModal('expense', item)}
+          onDelete={handleDeleteExpense}
+        />;
       case 'payroll':
-        return <PayrollTable payroll={mapPayroll} />;
+        return <PayrollTable
+          payroll={mapPayroll}
+          onEdit={(item) => handleOpenModal('payroll', item)}
+          onDelete={handleDeletePayroll}
+        />;
       case 'contacts':
         return <ContactsTable contacts={mapContacts} />;
       default:
@@ -418,13 +472,15 @@ const App = () => {
         )}
         {modalType === 'expense' && (
           <AddExpenseForm
-            onSave={handleAddExpense}
+            initialData={editingService}
+            onSave={handleSaveExpense}
             onCancel={() => setIsModalOpen(false)}
           />
         )}
         {modalType === 'payroll' && (
           <AddPayrollForm
-            onSave={handleAddPayroll}
+            initialData={editingService}
+            onSave={handleSavePayroll}
             onCancel={() => setIsModalOpen(false)}
           />
         )}

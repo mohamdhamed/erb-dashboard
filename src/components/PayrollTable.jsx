@@ -1,7 +1,7 @@
 import React from 'react';
-import { Users, Printer } from 'lucide-react';
+import { Users, Printer, Edit, Trash2 } from 'lucide-react';
 
-const PayrollTable = ({ payroll }) => {
+const PayrollTable = ({ payroll, onEdit, onDelete }) => {
     // دالة مساعدة لحساب صافي الراتب
     const calculateNetPay = (hours, rate, bonus, advance) => {
         return (hours * rate) + bonus - advance;
@@ -29,6 +29,7 @@ const PayrollTable = ({ payroll }) => {
                             <th className="px-4 py-3">سلفيات</th>
                             <th className="px-4 py-3 bg-blue-50 text-blue-800">الصافي المستحق</th>
                             <th className="px-4 py-3">حالة التحويل</th>
+                            <th className="px-4 py-3"></th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -48,6 +49,22 @@ const PayrollTable = ({ payroll }) => {
                                     ) : (
                                         <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs border border-yellow-200 block text-center w-full max-w-[80px]">{item.status}</span>
                                     )}
+                                </td>
+                                <td className="px-4 py-3 flex gap-2 justify-end">
+                                    <button
+                                        onClick={() => onEdit(item)}
+                                        className="text-blue-600 hover:text-blue-800 p-1 hover:bg-blue-50 rounded transition"
+                                        title="تعديل"
+                                    >
+                                        <Edit size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => onDelete(item.id)}
+                                        className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition"
+                                        title="حذف"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
                                 </td>
                             </tr>
                         ))}

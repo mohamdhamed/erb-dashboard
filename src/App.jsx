@@ -12,8 +12,11 @@ import AddExpenseForm from './components/forms/AddExpenseForm';
 import AddPayrollForm from './components/forms/AddPayrollForm';
 import AddContactForm from './components/forms/AddContactForm';
 import Notifications from './components/Notifications';
+import Login from './components/Login';
+import { Users, DollarSign, FileText, Briefcase, Plus, LogOut } from 'lucide-react';
 
 const App = () => {
+  const [session, setSession] = useState(null);
   const [activeTab, setActiveTab] = useState('services');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null); // 'service', 'expense', 'payroll', 'contact'
@@ -26,10 +29,24 @@ const App = () => {
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch Data on Load
   useEffect(() => {
-    fetchData();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  // Fetch Data on Load (Only if logged in)
+  useEffect(() => {
+    if (session) fetchData();
+  }, [session]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -228,6 +245,10 @@ const App = () => {
     }
   };
 
+  if (!session) {
+    return <Login />;
+  }
+
   return (
     <div dir="rtl" className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-right">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -245,6 +266,13 @@ const App = () => {
             </div>
           </div>
           <div className="flex gap-3 mt-4 md:mt-0 w-full md:w-auto items-center">
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-red-600 transition"
+              title="تسجيل الخروج"
+            >
+              <LogOut size={20} />
+            </button>
             <Notifications alerts={getAlerts()} />
 
             <button className="flex-1 md:flex-none justify-center items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-50 shadow-sm transition font-medium text-sm hidden md:flex">

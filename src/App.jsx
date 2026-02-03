@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, DollarSign, FileText, Briefcase, Plus, LogOut } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { supabase } from './supabaseClient';
 import ServicesTable from './components/ServicesTable';
 import ExpensesList from './components/ExpensesList';
@@ -171,6 +172,70 @@ const App = () => {
     }
   };
 
+  const handleExport = () => {
+    let dataToExport = [];
+    let fileName = '';
+
+    switch (activeTab) {
+      case 'services':
+        dataToExport = services.map(s => ({
+          'العميل': s.client,
+          'التاريخ': s.date,
+          'نوع الخدمة': s.type,
+          'الموقع': s.location,
+          'الموظفين': s.staff,
+          'الساعات': s.hours,
+          'القيمة': s.revenue,
+          'الحالة': s.status
+        }));
+        fileName = 'سجل_العمليات';
+        break;
+      case 'expenses':
+        dataToExport = expenses.map(e => ({
+          'البند': e.item,
+          'الفئة': e.category,
+          'القيمة': e.amount,
+          'التاريخ': e.date,
+          'مدفوع بواسطة': e.paid_by
+        }));
+        fileName = 'سجل_المصاريف';
+        break;
+      case 'payroll':
+        dataToExport = payroll.map(p => ({
+          'الاسم': p.name,
+          'إجمالي الساعات': p.total_hours || p.totalHours,
+          'المعدل/ساعة': p.rate,
+          'المكافآت': p.bonus,
+          'السلف': p.advance,
+          'صافي الراتب': ((p.total_hours || p.totalHours) * p.rate + (Number(p.bonus) || 0) - (Number(p.advance) || 0)).toFixed(2),
+          'الحالة': p.status
+        }));
+        fileName = 'رواتب_الموظفين';
+        break;
+      case 'contacts':
+        dataToExport = contacts.map(c => ({
+          'الاسم': c.name,
+          'النوع': c.type,
+          'الرقم الضريبي': c.tax_id || c.taxId,
+          'رصيد البداية': c.start_balance || c.startBalance,
+          'إجمالي التعاملات': c.volume,
+          'المستحق': c.outstanding
+        }));
+        fileName = 'العملاء_والموردين';
+        break;
+      default:
+        return;
+    }
+
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    // Add RTL direction to sheet
+    if (!ws['!dir']) ws['!dir'] = 'rtl';
+
+    XLSX.writeFile(wb, `${fileName}_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
   const mapPayroll = payroll.map(p => ({
     ...p,
     totalHours: p.total_hours !== undefined ? p.total_hours : p.totalHours,
@@ -274,7 +339,10 @@ const App = () => {
             </button>
             <Notifications alerts={getAlerts()} />
 
-            <button className="flex-1 md:flex-none justify-center items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-50 shadow-sm transition font-medium text-sm hidden md:flex">
+            <button
+              onClick={handleExport}
+              className="flex-1 md:flex-none justify-center items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-50 shadow-sm transition font-medium text-sm hidden md:flex"
+            >
               <FileText size={16} />
               تصدير Excel
             </button>

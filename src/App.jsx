@@ -16,6 +16,7 @@ const App = () => {
   const [activeTab, setActiveTab] = useState('services');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null); // 'service', 'expense', 'payroll', 'contact'
+  const [editingService, setEditingService] = useState(null);
 
   // Data States
   const [services, setServices] = useState([]);
@@ -48,24 +49,46 @@ const App = () => {
     }
   };
 
-  const handleOpenModal = () => {
-    // Determine modal type based on active tab
-    if (activeTab === 'services') setModalType('service');
-    else if (activeTab === 'expenses') setModalType('expense');
-    else if (activeTab === 'payroll') setModalType('payroll');
-    else if (activeTab === 'contacts') setModalType('contact');
-
+  const handleOpenModal = (type, data = null) => {
+    setModalType(type);
+    setEditingService(data);
     setIsModalOpen(true);
   };
 
-  const handleAddService = async (newService) => {
+  const handleSaveService = async (formData) => {
     try {
-      const { data, error } = await supabase.from('services').insert([newService]).select();
-      if (error) throw error;
-      setServices([data[0], ...services]);
+      if (editingService) {
+        // Update existing service
+        const { error } = await supabase
+          .from('services')
+          .update(formData)
+          .eq('id', editingService.id);
+
+        if (error) throw error;
+
+        setServices(services.map(s => s.id === editingService.id ? { ...formData, id: editingService.id } : s));
+      } else {
+        // Add new service
+        const { data, error } = await supabase.from('services').insert([formData]).select();
+        if (error) throw error;
+        setServices([data[0], ...services]);
+      }
       setIsModalOpen(false);
+      setEditingService(null);
     } catch (error) {
-      alert('Error adding service: ' + error.message);
+      alert('Error saving service: ' + error.message);
+    }
+  };
+
+  const handleDeleteService = async (id) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذه العملية؟')) return;
+
+    try {
+      const { error } = await supabase.from('services').delete().eq('id', id);
+      if (error) throw error;
+      setServices(services.filter(s => s.id !== id));
+    } catch (error) {
+      alert('Error deleting service: ' + error.message);
     }
   };
 
@@ -149,7 +172,11 @@ const App = () => {
 
     switch (activeTab) {
       case 'services':
-        return <ServicesTable services={services} />;
+        return <ServicesTable
+          services={services}
+          onEdit={(item) => handleOpenModal('service', item)}
+          onDelete={handleDeleteService}
+        />;
       case 'expenses':
         return <ExpensesList expenses={expenses} />;
       case 'payroll':
@@ -190,7 +217,11 @@ const App = () => {
               تصدير Excel
             </button>
             <button
-              onClick={handleOpenModal}
+              onClick={() => handleOpenModal(
+                activeTab === 'services' ? 'service' :
+                  activeTab === 'expenses' ? 'expense' :
+                    activeTab === 'payroll' ? 'payroll' : 'contact'
+              )}
               className="flex-1 md:flex-none justify-center items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition font-medium text-sm"
             >
               <Plus size={16} />
@@ -240,7 +271,7 @@ const App = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={
-          modalType === 'service' ? 'إضافة عملية جديدة' :
+          modalType === 'service' ? (editingService ? 'تعديل العملية' : 'إضافة عملية جديدة') :
             modalType === 'expense' ? 'تسجيل مصروف جديد' :
               modalType === 'payroll' ? 'إضافة موظف / راتب' :
                 modalType === 'contact' ? 'إضافة عميل / مورد' :
@@ -249,7 +280,8 @@ const App = () => {
       >
         {modalType === 'service' && (
           <AddServiceForm
-            onSave={handleAddService}
+            initialData={editingService}
+            onSave={handleSaveService}
             onCancel={() => setIsModalOpen(false)}
           />
         )}

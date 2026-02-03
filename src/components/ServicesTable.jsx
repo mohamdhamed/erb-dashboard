@@ -1,7 +1,7 @@
 import React from 'react';
-import { Briefcase, Filter, CheckCircle, Clock, Calendar } from 'lucide-react';
+import { Briefcase, Filter, CheckCircle, Clock, Calendar, Pencil, Trash2 } from 'lucide-react';
 
-const ServicesTable = ({ services }) => {
+const ServicesTable = ({ services, onEdit, onDelete }) => {
     return (
         <div className="bg-white rounded-lg shadow border border-gray-100 overflow-hidden">
             <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
@@ -28,6 +28,7 @@ const ServicesTable = ({ services }) => {
                             <th className="px-4 py-3">القيمة (€)</th>
                             <th className="px-4 py-3">الحالة</th>
                             <th className="px-4 py-3">الفاتورة</th>
+                            <th className="px-4 py-3">إجراءات</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -37,8 +38,8 @@ const ServicesTable = ({ services }) => {
                                 <td className="px-4 py-3 font-medium text-gray-900">{item.client}</td>
                                 <td className="px-4 py-3">
                                     <span className={`text-xs font-medium px-2.5 py-0.5 rounded border ${item.type === 'تنظيف عميق' ? 'bg-purple-50 text-purple-700 border-purple-100' :
-                                            item.type === 'مكتبي' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                                                'bg-gray-50 text-gray-600 border-gray-200'
+                                        item.type === 'مكتبي' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                            'bg-gray-50 text-gray-600 border-gray-200'
                                         }`}>
                                         {item.type}
                                     </span>
@@ -63,6 +64,22 @@ const ServicesTable = ({ services }) => {
                                     )}
                                 </td>
                                 <td className="px-4 py-3 text-gray-400 text-xs">{item.invoice}</td>
+                                <td className="px-4 py-3 flex items-center gap-2">
+                                    <button
+                                        onClick={() => onEdit(item)}
+                                        className="text-blue-500 hover:bg-blue-50 p-1.5 rounded transition"
+                                        title="تعديل"
+                                    >
+                                        <Pencil size={15} />
+                                    </button>
+                                    <button
+                                        onClick={() => onDelete(item.id)}
+                                        className="text-red-500 hover:bg-red-50 p-1.5 rounded transition"
+                                        title="حذف"
+                                    >
+                                        <Trash2 size={15} />
+                                    </button>
+                                </td>
                             </tr>
                         ))}
                     </tbody>

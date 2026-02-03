@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Save } from 'lucide-react';
 
-const AddServiceForm = ({ onSave, onCancel }) => {
-    const [formData, setFormData] = useState({
+const AddServiceForm = ({ onSave, onCancel, initialData }) => {
+    const [formData, setFormData] = useState(initialData || {
         client: '',
         type: 'تنظيف عميق', // Default value
         location: '',

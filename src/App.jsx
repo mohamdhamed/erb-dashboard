@@ -418,6 +418,13 @@ const App = () => {
         <DashboardStats
           revenue={services.reduce((acc, curr) => acc + (Number(curr.revenue) || 0), 0)}
           expenses={expenses.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0)}
+          payroll={payroll
+            .filter(p => p.status === 'تم التحويل')
+            .reduce((acc, curr) => {
+              const netPay = (curr.total_hours || curr.totalHours) * curr.rate + (Number(curr.bonus) || 0) - (Number(curr.advance) || 0);
+              return acc + netPay;
+            }, 0)
+          }
           outstanding={services.filter(s => s.status !== 'تم الدفع').reduce((acc, curr) => acc + (Number(curr.revenue) || 0), 0)}
         />
 

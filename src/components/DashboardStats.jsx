@@ -1,8 +1,9 @@
 import React from 'react';
 import { DollarSign, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 
-const DashboardStats = ({ revenue = 0, expenses = 0, outstanding = 0 }) => {
-    const netProfit = revenue - expenses;
+const DashboardStats = ({ revenue = 0, expenses = 0, payroll = 0, outstanding = 0 }) => {
+    // Net Profit = Revenue - (Operating Expenses + Paid Payroll)
+    const netProfit = revenue - (expenses + payroll);
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -12,7 +13,6 @@ const DashboardStats = ({ revenue = 0, expenses = 0, outstanding = 0 }) => {
                     <div className="bg-blue-50 p-2.5 rounded-lg">
                         <DollarSign size={20} className="text-blue-600" />
                     </div>
-                    {/* <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">+12%</span> */}
                 </div>
                 <div>
                     <div className="text-gray-500 text-sm font-medium mb-1">إيرادات الشهر</div>
@@ -28,8 +28,9 @@ const DashboardStats = ({ revenue = 0, expenses = 0, outstanding = 0 }) => {
                     </div>
                 </div>
                 <div>
-                    <div className="text-gray-500 text-sm font-medium mb-1">المصاريف</div>
-                    <div className="text-2xl font-bold text-gray-800">€{expenses.toFixed(2)}</div>
+                    <div className="text-gray-500 text-sm font-medium mb-1">المصاريف + الرواتب</div>
+                    <div className="text-2xl font-bold text-gray-800">€{(expenses + payroll).toFixed(2)}</div>
+                    <div className="text-xs text-red-500 mt-1">مصاريف: €{expenses.toFixed(0)} | رواتب: €{payroll.toFixed(0)}</div>
                 </div>
             </div>
 

@@ -372,18 +372,18 @@ const App = () => {
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Header Section */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex items-center gap-4">
-            <img src="/logo.png" alt="Pulsar Logo" className="h-16 object-contain" />
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-200 gap-4">
+          <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
+            <img src="/logo.png" alt="Pulsar Logo" className="h-12 md:h-16 object-contain" />
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-800 tracking-tight">نظام إدارة العمليات</h1>
-              <p className="text-gray-500 mt-1 flex items-center gap-2 text-sm">
+              <h1 className="text-xl md:text-3xl font-bold text-gray-800 tracking-tight">نظام إدارة العمليات</h1>
+              <p className="text-gray-500 mt-1 flex items-center gap-2 text-xs md:text-sm">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                 ميلانو، إيطاليا - {new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             </div>
           </div>
-          <div className="flex gap-3 mt-4 md:mt-0 w-full md:w-auto items-center">
+          <div className="flex gap-2 md:gap-3 w-full md:w-auto items-center justify-end">
             <button
               onClick={() => supabase.auth.signOut()}
               className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-red-600 transition"
@@ -395,10 +395,11 @@ const App = () => {
 
             <button
               onClick={handleExport}
-              className="flex-1 md:flex-none justify-center items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-50 shadow-sm transition font-medium text-sm hidden md:flex"
+              className="flex justify-center items-center gap-2 bg-white border border-gray-300 text-gray-700 p-2.5 md:px-4 md:py-2.5 rounded-lg hover:bg-gray-50 shadow-sm transition font-medium text-sm"
+              title="تصدير Excel"
             >
-              <FileText size={16} />
-              تصدير Excel
+              <FileText size={20} className="md:w-4 md:h-4" />
+              <span className="hidden md:inline">تصدير Excel</span>
             </button>
             <button
               onClick={() => handleOpenModal(
@@ -406,10 +407,11 @@ const App = () => {
                   activeTab === 'expenses' ? 'expense' :
                     activeTab === 'payroll' ? 'payroll' : 'contact'
               )}
-              className="flex-1 md:flex-none justify-center items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition font-medium text-sm"
+              className="flex-1 md:flex-none justify-center items-center gap-2 bg-blue-600 text-white p-2.5 md:px-4 md:py-2.5 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition font-medium text-sm whitespace-nowrap"
             >
-              <Plus size={16} />
-              {getButtonLabel()}
+              <Plus size={20} className="md:w-4 md:h-4" />
+              <span className="hidden xs:inline">{getButtonLabel()}</span>
+              <span className="xs:hidden">جديد</span>
             </button>
           </div>
         </header>

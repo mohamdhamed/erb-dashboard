@@ -171,22 +171,21 @@ const App = () => {
     }
   };
 
+  const mapPayroll = payroll.map(p => ({
+    ...p,
+    totalHours: p.total_hours !== undefined ? p.total_hours : p.totalHours,
+  }));
+
+  const mapContacts = contacts.map(c => ({
+    ...c,
+    taxId: c.tax_id !== undefined ? c.tax_id : c.taxId,
+    startBalance: c.start_balance !== undefined ? c.start_balance : c.startBalance
+  }));
+
   const renderContent = () => {
     if (loading && services.length === 0 && expenses.length === 0) {
       return <div className="p-12 text-center text-gray-400">جاري تحميل البيانات...</div>;
     }
-
-    // Map snake_case from DB to camelCase for UI components
-    const mapPayroll = payroll.map(p => ({
-      ...p,
-      totalHours: p.total_hours !== undefined ? p.total_hours : p.totalHours,
-    }));
-
-    const mapContacts = contacts.map(c => ({
-      ...c,
-      taxId: c.tax_id !== undefined ? c.tax_id : c.taxId,
-      startBalance: c.start_balance !== undefined ? c.start_balance : c.startBalance
-    }));
 
     switch (activeTab) {
       case 'services':

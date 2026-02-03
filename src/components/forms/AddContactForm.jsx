@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Save } from 'lucide-react';
 
-const AddContactForm = ({ onSave, onCancel }) => {
-    const [formData, setFormData] = useState({
+const AddContactForm = ({ onSave, onCancel, initialData }) => {
+    const [formData, setFormData] = useState(initialData || {
         name: '',
         type: 'عميل',
         taxId: '',

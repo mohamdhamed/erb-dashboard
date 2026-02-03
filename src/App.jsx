@@ -193,28 +193,56 @@ const App = () => {
   };
 
 
-  const handleAddContact = async (newContact) => {
+  const handleSaveContact = async (formData) => {
     try {
       const dbPayload = {
-        name: newContact.name,
-        type: newContact.type,
-        tax_id: newContact.taxId,
-        start_balance: newContact.startBalance,
-        volume: newContact.volume,
-        outstanding: newContact.outstanding
+        name: formData.name,
+        type: formData.type,
+        tax_id: formData.taxId,
+        start_balance: formData.startBalance,
+        // Volume and outstanding are calculated, we don't save them directly usually unless overriding
+        // For simplicity we save what we have or let calculation take over
+        volume: formData.volume || 0,
+        outstanding: formData.outstanding || 0
       };
-      const { data, error } = await supabase.from('contacts').insert([dbPayload]).select();
-      if (error) throw error;
 
-      const newItem = {
-        ...data[0],
-        taxId: data[0].tax_id,
-        startBalance: data[0].start_balance
+      if (editingService) {
+        const { error } = await supabase
+          .from('contacts')
+          .update(dbPayload)
+          .eq('id', editingService.id);
+
+        if (error) throw error;
+
+        // Optimistic update
+        const updatedItem = { ...formData, id: editingService.id, taxId: formData.taxId, startBalance: formData.startBalance };
+        setContacts(contacts.map(c => c.id === editingService.id ? updatedItem : c));
+      } else {
+        const { data, error } = await supabase.from('contacts').insert([dbPayload]).select();
+        if (error) throw error;
+
+        const newItem = {
+          ...data[0],
+          taxId: data[0].tax_id,
+          startBalance: data[0].start_balance
+        }
+        setContacts([newItem, ...contacts]);
       }
-      setContacts([newItem, ...contacts]);
       setIsModalOpen(false);
+      setEditingService(null);
     } catch (error) {
-      alert('Error adding contact: ' + error.message);
+      alert('Error saving contact: ' + error.message);
+    }
+  };
+
+  const handleDeleteContact = async (id) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذا العميل؟')) return;
+    try {
+      const { error } = await supabase.from('contacts').delete().eq('id', id);
+      if (error) throw error;
+      setContacts(contacts.filter(c => c.id !== id));
+    } catch (error) {
+      alert('Error deleting contact: ' + error.message);
     }
   };
 
@@ -333,7 +361,11 @@ const App = () => {
           onDelete={handleDeletePayroll}
         />;
       case 'contacts':
-        return <ContactsTable contacts={mapContacts} />;
+        return <ContactsTable
+          contacts={mapContacts}
+          onEdit={(item) => handleOpenModal('contact', item)}
+          onDelete={handleDeleteContact}
+        />;
       default:
         return null;
     }
@@ -510,8 +542,9 @@ const App = () => {
         )}
         {modalType === 'contact' && (
           <AddContactForm
-            onSave={handleAddContact}
-            onCancel={() => setIsModalOpen(false)}
+            onSave={handleSaveContact}
+            onCancel={() => { setIsModalOpen(false); setEditingService(null); }}
+            initialData={editingService}
           />
         )}
       </Modal>

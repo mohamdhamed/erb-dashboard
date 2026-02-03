@@ -1,14 +1,46 @@
-import React from 'react';
-import { FileText } from 'lucide-react';
+import React, { useState } from 'react';
+import { FileText, Users, ShoppingBag } from 'lucide-react';
 
 const ContactsTable = ({ contacts }) => {
+    const [filterType, setFilterType] = useState('all'); // all, client, supplier
+
+    const filteredContacts = contacts.filter(item => {
+        if (filterType === 'all') return true;
+        if (filterType === 'client') return item.type === 'عميل';
+        if (filterType === 'supplier') return item.type === 'مورد';
+        return true;
+    });
+
     return (
         <div className="bg-white rounded-lg shadow border border-gray-100 overflow-hidden">
-            <div className="p-4 border-b bg-gray-50">
+            <div className="p-4 border-b bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <h3 className="font-bold text-gray-700 flex items-center gap-2">
                     <FileText size={18} className="text-orange-600" />
                     دليل العملاء والموردين (Anagrafica)
                 </h3>
+
+                <div className="flex bg-gray-200 p-1 rounded-lg">
+                    <button
+                        onClick={() => setFilterType('all')}
+                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${filterType === 'all' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-600 hover:text-gray-800'}`}
+                    >
+                        الكل
+                    </button>
+                    <button
+                        onClick={() => setFilterType('client')}
+                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition flex items-center gap-1 ${filterType === 'client' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-800'}`}
+                    >
+                        <Users size={14} />
+                        عملاء
+                    </button>
+                    <button
+                        onClick={() => setFilterType('supplier')}
+                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition flex items-center gap-1 ${filterType === 'supplier' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-600 hover:text-gray-800'}`}
+                    >
+                        <ShoppingBag size={14} />
+                        موردين
+                    </button>
+                </div>
             </div>
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-right text-gray-700">
@@ -23,7 +55,7 @@ const ContactsTable = ({ contacts }) => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                        {contacts.map((item) => (
+                        {filteredContacts.map((item) => (
                             <tr key={item.id} className="bg-white hover:bg-gray-50 transition-colors">
                                 <td className="px-4 py-3 font-bold text-gray-800">{item.name}</td>
                                 <td className="px-4 py-3">

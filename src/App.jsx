@@ -346,6 +346,7 @@ const App = () => {
             initialData={editingService}
             onSave={handleSaveService}
             onCancel={() => setIsModalOpen(false)}
+            availableClients={mapContacts}
           />
         )}
         {modalType === 'expense' && (

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Save } from 'lucide-react';
 
-const AddServiceForm = ({ onSave, onCancel, initialData }) => {
+const AddServiceForm = ({ onSave, onCancel, initialData, availableClients = [] }) => {
     const [formData, setFormData] = useState(initialData || {
         client: '',
         type: 'تنظيف عميق', // Default value
@@ -33,11 +33,21 @@ const AddServiceForm = ({ onSave, onCancel, initialData }) => {
                         type="text"
                         name="client"
                         required
+                        list="client-options"
                         value={formData.client}
                         onChange={handleChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                         placeholder="اسم العميل"
+                        autoComplete="off"
                     />
+                    <datalist id="client-options">
+                        {availableClients
+                            .filter(c => c.type === 'عميل' || !c.type) // Show clients or undefined types
+                            .map((c, index) => (
+                                <option key={index} value={c.name} />
+                            ))
+                        }
+                    </datalist>
                 </div>
                 <div className="space-y-1">
                     <label className="text-sm font-medium text-gray-700">التاريخ</label>

@@ -234,12 +234,15 @@ const App = () => {
 
         {/* Header Section */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 tracking-tight">نظام إدارة العمليات</h1>
-            <p className="text-gray-500 mt-1 flex items-center gap-2 text-sm">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-              ميلانو، إيطاليا - {new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </p>
+          <div className="flex items-center gap-4">
+            <img src="/logo.png" alt="Pulsar Logo" className="h-16 object-contain" />
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-800 tracking-tight">نظام إدارة العمليات</h1>
+              <p className="text-gray-500 mt-1 flex items-center gap-2 text-sm">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                ميلانو، إيطاليا - {new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
+            </div>
           </div>
           <div className="flex gap-3 mt-4 md:mt-0 w-full md:w-auto items-center">
             <Notifications alerts={getAlerts()} />
